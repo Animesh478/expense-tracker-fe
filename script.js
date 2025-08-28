@@ -15,6 +15,27 @@ const data = [
 
 const transactions = data;
 
+function addTransaction(e) {
+  e.preventDefault();
+  if (text.value.trim() === "" || amount.value.trim() === "") {
+    alert("Enter text and amount");
+  } else {
+    const transaction = {
+      id: generateId(),
+      text: text.value,
+      amount: Number(amount.value),
+    };
+
+    transactions.push(transaction);
+    addTransactionToDOM(transaction);
+    updateValues();
+  }
+}
+
+function generateId() {
+  return Math.floor(Math.random() * 1000000000) + 1;
+}
+
 function addTransactionToDOM(transaction) {
   //get the sign
   const sign = transaction.amount < 0 ? "-" : "+";
@@ -32,10 +53,34 @@ function addTransactionToDOM(transaction) {
   list.appendChild(li);
 }
 
+// update balance, income and expense
+function updateValues() {
+  const amounts = transactions.map((transaction) => transaction.amount);
+  const balanceAmount = amounts.reduce((acc, val) => (acc += val), 0);
+  const income = amounts
+    .filter((val) => val > 0)
+    .reduce((acc, val) => (acc += val), 0);
+  const expense =
+    amounts.filter((val) => val < 0).reduce((acc, val) => (acc += val), 0) * -1;
+
+  balance.textContent = `Rs ${balanceAmount.toFixed(2)}`;
+  moneyPlus.textContent = `+ Rs ${income.toFixed(2)}`;
+  moneyMinus.textContent = `- Rs ${expense.toFixed(2)}`;
+}
+
+// delete transaction
+function deleteTransaction(id) {
+  transactions = transactions.filter((transaction) => transaction.id !== id);
+  init();
+}
+
 // Init the app
 function init() {
   list.innerHTML = ""; // clear the list in the DOM
   transactions.forEach(addTransactionToDOM);
+  updateValues();
 }
 
 init();
+
+form.addEventListener("submit", addTransaction);
